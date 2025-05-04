@@ -11,11 +11,20 @@ import {
   userPaginationDto,
 } from 'src/common/dtos/user/user.dto';
 import { UserEntity } from 'src/database';
-import { FindOperator, ILike, QueryFailedError, Repository } from 'typeorm';
+import { ILike, QueryFailedError, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
+  private readonly defaultSelect: (keyof UserEntity)[] = [
+    'id',
+    'email',
+    'firstName',
+    'lastName',
+    'avatar',
+    'created_at',
+    'updated_at',
+  ] as const;
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
@@ -45,26 +54,14 @@ export class UserService {
 
   async getAllUser(query: userPaginationDto) {
     const { email = '', limit = 10, setOff = 0 } = query;
-    const whereClause: Record<string, string | FindOperator<string>> = {};
-
-    if (email) {
-      whereClause.email = ILike(`%${email}%`);
-    }
+    const where = email ? { email: ILike(`%${email}%`) } : undefined;
 
     const [data, total] = await this.userRepository.findAndCount({
-      where: whereClause,
+      where: where,
       skip: setOff,
       order: { created_at: 'DESC' },
       take: limit,
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        created_at: true,
-        updated_at: true,
-        lastName: true,
-        avatar: true,
-      },
+      select: this.defaultSelect,
     });
     return {
       message: 'Get all user successfully',
@@ -78,15 +75,7 @@ export class UserService {
   async getDetailUser(id: number) {
     const result = await this.userRepository.findOne({
       where: { id },
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        created_at: true,
-        updated_at: true,
-        lastName: true,
-        avatar: true,
-      },
+      select: this.defaultSelect,
     });
     if (!result) {
       throw new NotFoundException('User not found');
@@ -98,31 +87,31 @@ export class UserService {
   }
 
   async update(id: number, dataForm: updateUserDto) {
-    const user = await this.userRepository.findOne({
-      where: { id },
-    });
+    if (dataForm.password) {
+      dataForm.password = await this.hashPassword(dataForm.password);
+    }
 
+    const user = await this.userRepository.preload({ id, ...dataForm });
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    if (dataForm?.password) {
-      const salt = await bcrypt.genSalt();
-      dataForm.password = await bcrypt.hash(dataForm.password, salt);
+    try {
+      await this.userRepository.save(user);
+    } catch (error) {
+      if (
+        error instanceof QueryFailedError &&
+        (error as any).code === '23505'
+      ) {
+        throw new ConflictException('Email already exists');
+      }
+      throw new InternalServerErrorException('Update user error');
     }
-    Object.assign(user, dataForm);
-    await this.userRepository.save(user);
+
     const userInfo = await this.userRepository.findOne({
       where: { id },
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        created_at: true,
-        updated_at: true,
-        lastName: true,
-        avatar: true,
-      },
+      select: this.defaultSelect,
     });
+
     return {
       message: 'Update info user successfully',
       data: userInfo,
