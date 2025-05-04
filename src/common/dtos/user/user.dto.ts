@@ -6,10 +6,11 @@ import {
   IsEnum,
   IsNumber,
   Min,
+  IsInt,
 } from 'class-validator';
 import { Role } from 'src/common/enums/role.enum';
 
-export class CreateUserDto {
+export class createUserDto {
   @IsString()
   firstName: string;
 
@@ -35,6 +36,28 @@ export class CreateUserDto {
   hasTokenRefresh?: string;
 }
 
+export class updateUserDto {
+  @IsString()
+  @IsOptional()
+  firstName?: string;
+
+  @IsString()
+  @IsOptional()
+  lastName?: string;
+
+  @IsString()
+  @IsOptional()
+  password?: string;
+
+  @IsOptional()
+  @IsString()
+  avatar?: string;
+
+  @IsOptional()
+  @IsEnum(Role)
+  role?: Role;
+}
+
 export class userPaginationDto {
   @IsNumber()
   @Type(() => Number)
@@ -55,12 +78,7 @@ export class userPaginationDto {
 }
 
 export class idParams {
-  @IsNumber(
-    {},
-    {
-      message: 'id must be a number without special characters',
-    },
-  )
-  @Type(() => Number)
-  id: number = 5;
+  @Type(() => Number) // chuyển string → number
+  @IsInt({ message: 'Id must be an integer' })
+  id: number;
 }

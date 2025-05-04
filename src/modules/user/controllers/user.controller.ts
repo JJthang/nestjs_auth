@@ -11,8 +11,9 @@ import {
 } from '@nestjs/common';
 import { UserService } from '../service/user.service';
 import {
-  CreateUserDto,
+  createUserDto as CreateUserDto,
   idParams,
+  updateUserDto,
   userPaginationDto,
 } from 'src/common/dtos/user/user.dto';
 
@@ -42,8 +43,8 @@ export class UserController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: idParams, @Body() updateUserDto: UserService) {
-    return this.userService.update(+id, updateUserDto);
+  update(@Param() params: idParams, @Body() updateUserDto: updateUserDto) {
+    return this.userService.update(params.id, updateUserDto);
   }
 
   @Delete(':id')

@@ -1,15 +1,18 @@
 import {
+  ConflictException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
-  CreateUserDto,
+  createUserDto as CreateUserDto,
+  updateUserDto,
   userPaginationDto,
 } from 'src/common/dtos/user/user.dto';
 import { UserEntity } from 'src/database';
-import { FindOperator, ILike, Repository } from 'typeorm';
+import { FindOperator, ILike, QueryFailedError, Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -17,25 +20,27 @@ export class UserService {
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
   ) {}
+  private async hashPassword(password: string): Promise<string> {
+    const salt = await bcrypt.genSalt();
+    return bcrypt.hash(password, salt);
+  }
 
   async create(createUserDto: CreateUserDto) {
-    const existngUser = await this.userRepository.findOne({
-      where: {
-        email: createUserDto.email,
-      },
-    });
-    console.log('existngUser : ', existngUser);
-
-    if (existngUser) {
-      throw new NotFoundException('Email already exists');
+    try {
+      const user = this.userRepository.create({
+        ...createUserDto,
+        password: await this.hashPassword(createUserDto.password),
+      });
+      return await this.userRepository.save(user);
+    } catch (error) {
+      if (
+        error instanceof QueryFailedError &&
+        (error as any).code === '23505'
+      ) {
+        throw new ConflictException('Email already exists');
+      }
+      throw new InternalServerErrorException('Create account error');
     }
-    const result = this.userRepository.create(createUserDto);
-    const saveValue = await this.userRepository.save(result);
-
-    if (!saveValue) {
-      throw new NotFoundException('Create account error');
-    }
-    return result;
   }
 
   async getAllUser(query: userPaginationDto) {
@@ -92,8 +97,36 @@ export class UserService {
     };
   }
 
-  update(id: number, updateUserDto) {
-    return `This action updates a #id user`;
+  async update(id: number, dataForm: updateUserDto) {
+    const user = await this.userRepository.findOne({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    if (dataForm?.password) {
+      const salt = await bcrypt.genSalt();
+      dataForm.password = await bcrypt.hash(dataForm.password, salt);
+    }
+    Object.assign(user, dataForm);
+    await this.userRepository.save(user);
+    const userInfo = await this.userRepository.findOne({
+      where: { id },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        created_at: true,
+        updated_at: true,
+        lastName: true,
+        avatar: true,
+      },
+    });
+    return {
+      message: 'Update info user successfully',
+      data: userInfo,
+    };
   }
 
   async remove(id: number) {
