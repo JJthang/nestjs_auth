@@ -19,7 +19,7 @@ import {
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post('create-account')
+  @Post()
   async create(@Body() createUserDto: CreateUserDto) {
     const result = await this.userService.create(createUserDto);
 
@@ -30,14 +30,14 @@ export class UserController {
     };
   }
 
-  @Get('list_users')
+  @Get()
   getAllUser(@Query() query: userPaginationDto) {
     return this.userService.getAllUser(query);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+  getDetailUser(@Param('id') id: string) {
+    return this.userService.getDetailUser(+id);
   }
 
   @Patch(':id')

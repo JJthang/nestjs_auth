@@ -51,5 +51,5 @@ export class userPaginationDto {
   @IsString()
   @Type(() => String)
   @IsOptional()
-  email?: number = 0;
+  email?: string;
 }

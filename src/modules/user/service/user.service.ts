@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   CreateUserDto,
@@ -35,16 +39,27 @@ export class UserService {
   }
 
   async getAllUser(query: userPaginationDto) {
-    const { email, limit = 10, setOff = 0 } = query;
+    const { email = '', limit = 10, setOff = 0 } = query;
     const whereClause: Record<string, string | FindOperator<string>> = {};
+
     if (email) {
       whereClause.email = ILike(`%${email}%`);
     }
+
     const [data, total] = await this.userRepository.findAndCount({
       where: whereClause,
       skip: setOff,
       order: { created_at: 'DESC' },
       take: limit,
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        created_at: true,
+        updated_at: true,
+        lastName: true,
+        avatar: true,
+      },
     });
     return {
       message: 'Get all user successfully',
@@ -55,8 +70,26 @@ export class UserService {
     };
   }
 
-  findOne(id: number) {
-    return `This action returns a #id user`;
+  async getDetailUser(id: number) {
+    const result = await this.userRepository.findOne({
+      where: { id },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        created_at: true,
+        updated_at: true,
+        lastName: true,
+        avatar: true,
+      },
+    });
+    if (!result) {
+      throw new UnauthorizedException('User not found');
+    }
+    return {
+      message: 'Get user successfully',
+      data: result,
+    };
   }
 
   update(id: number, updateUserDto) {
