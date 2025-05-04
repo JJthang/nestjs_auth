@@ -12,6 +12,7 @@ import {
 import { UserService } from '../service/user.service';
 import {
   CreateUserDto,
+  idParams,
   userPaginationDto,
 } from 'src/common/dtos/user/user.dto';
 
@@ -36,17 +37,17 @@ export class UserController {
   }
 
   @Get(':id')
-  getDetailUser(@Param('id') id: string) {
+  getDetailUser(@Param('id') id: idParams) {
     return this.userService.getDetailUser(+id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UserService) {
+  update(@Param('id') id: idParams, @Body() updateUserDto: UserService) {
     return this.userService.update(+id, updateUserDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id') id: idParams) {
     return this.userService.remove(+id);
   }
 }

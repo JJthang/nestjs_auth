@@ -53,3 +53,14 @@ export class userPaginationDto {
   @IsOptional()
   email?: string;
 }
+
+export class idParams {
+  @IsNumber(
+    {},
+    {
+      message: 'id must be a number without special characters',
+    },
+  )
+  @Type(() => Number)
+  id: number = 5;
+}

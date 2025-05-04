@@ -84,7 +84,7 @@ export class UserService {
       },
     });
     if (!result) {
-      throw new UnauthorizedException('User not found');
+      throw new NotFoundException('User not found');
     }
     return {
       message: 'Get user successfully',
@@ -96,7 +96,13 @@ export class UserService {
     return `This action updates a #id user`;
   }
 
-  remove(id: number) {
-    return `This action removes a #id user`;
+  async remove(id: number) {
+    const result = await this.userRepository.delete(id);
+    if (!result.affected) {
+      throw new NotFoundException('User not found');
+    }
+    return {
+      message: 'Delete user successfully',
+    };
   }
 }
