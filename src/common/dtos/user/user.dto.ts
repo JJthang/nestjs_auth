@@ -1,4 +1,12 @@
-import { IsString, IsEmail, IsOptional, IsEnum } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsString,
+  IsEmail,
+  IsOptional,
+  IsEnum,
+  IsNumber,
+  Min,
+} from 'class-validator';
 import { Role } from 'src/common/enums/role.enum';
 
 export class CreateUserDto {
@@ -25,4 +33,23 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   hasTokenRefresh?: string;
+}
+
+export class userPaginationDto {
+  @IsNumber()
+  @Type(() => Number)
+  @Min(1)
+  @IsOptional()
+  limit?: number = 5;
+
+  @IsNumber()
+  @Type(() => Number)
+  @Min(0)
+  @IsOptional()
+  setOff?: number = 0;
+
+  @IsString()
+  @Type(() => String)
+  @IsOptional()
+  email?: number = 0;
 }

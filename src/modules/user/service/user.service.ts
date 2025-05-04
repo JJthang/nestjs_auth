@@ -1,8 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateUserDto } from 'src/common/dtos/user/user.dto';
+import {
+  CreateUserDto,
+  userPaginationDto,
+} from 'src/common/dtos/user/user.dto';
 import { UserEntity } from 'src/database';
-import { Repository } from 'typeorm';
+import { FindOperator, ILike, Repository } from 'typeorm';
 
 @Injectable()
 export class UserService {
@@ -31,10 +34,24 @@ export class UserService {
     return result;
   }
 
-  findAll() {
+  async getAllUser(query: userPaginationDto) {
+    const { email, limit = 10, setOff = 0 } = query;
+    const whereClause: Record<string, string | FindOperator<string>> = {};
+    if (email) {
+      whereClause.email = ILike(`%${email}%`);
+    }
+    const [data, total] = await this.userRepository.findAndCount({
+      where: whereClause,
+      skip: setOff,
+      order: { created_at: 'DESC' },
+      take: limit,
+    });
     return {
       message: 'Get all user successfully',
-      data: 'This action returns all users',
+      data: {
+        total,
+        result: data,
+      },
     };
   }
 
