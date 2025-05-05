@@ -55,6 +55,7 @@ export class UserService {
   async getAllUser(query: userPaginationDto) {
     const { email = '', limit = 10, setOff = 0 } = query;
     const where = email ? { email: ILike(`%${email}%`) } : undefined;
+    console.log('UserService : hello world ');
 
     const [data, total] = await this.userRepository.findAndCount({
       where: where,
