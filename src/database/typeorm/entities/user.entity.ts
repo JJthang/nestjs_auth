@@ -50,8 +50,7 @@ export class UserEntity {
   hasTokenRefresh: string;
 
   @BeforeInsert()
-  async beforeInsertActions() {
-    this.password = await hash(this.password, 10);
+  beforeInsertActions() {
     this.created_at = new Date();
     this.updated_at = new Date();
   }

@@ -13,6 +13,7 @@ import {
 import { UserEntity } from 'src/database';
 import { ILike, QueryFailedError, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { LoginRequestDto } from 'src/common/dtos/auth/login.dto';
 
 @Injectable()
 export class UserService {
@@ -34,7 +35,7 @@ export class UserService {
     return bcrypt.hash(password, salt);
   }
 
-  async create(createUserDto: CreateUserDto) {
+  async signUp(createUserDto: CreateUserDto) {
     try {
       const user = this.userRepository.create({
         ...createUserDto,
@@ -50,6 +51,19 @@ export class UserService {
       }
       throw new InternalServerErrorException('Create account error');
     }
+  }
+
+  async login(createUserDto: LoginRequestDto) {
+    const user = await this.userRepository.findOne({
+      where: {
+        email: createUserDto.email,
+      },
+    });
+    if (!user) {
+      throw new NotFoundException('Email does not exist');
+    }
+
+    return 'HELLO';
   }
 
   async getAllUser(query: userPaginationDto) {

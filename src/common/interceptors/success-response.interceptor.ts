@@ -26,7 +26,7 @@ export class SuccessResponseInterceptor<T>
         return {
           status: context.switchToHttp().getResponse<Response>().statusCode,
           message: (data as { message: string })?.message || '',
-          data,
+          data: (data as any).data,
         };
       }),
     );

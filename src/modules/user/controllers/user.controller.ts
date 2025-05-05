@@ -7,34 +7,32 @@ import {
   Param,
   Patch,
   Post,
-  Query,
 } from '@nestjs/common';
 import { UserService } from '../service/user.service';
 import {
   createUserDto as CreateUserDto,
   idParams,
   updateUserDto,
-  userPaginationDto,
 } from 'src/common/dtos/user/user.dto';
+import { LoginRequestDto } from 'src/common/dtos/auth/login.dto';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post()
-  async create(@Body() createUserDto: CreateUserDto) {
-    const result = await this.userService.create(createUserDto);
-
+  @Post('register')
+  async signUp(@Body() createUserDto: CreateUserDto) {
+    const result = await this.userService.signUp(createUserDto);
     return {
       status: HttpStatus.CREATED,
       messate: 'Create Account Successfully',
       data: result,
     };
   }
-
+  @Post('login')
   @Get()
-  getAllUser(@Query() query: userPaginationDto) {
-    return this.userService.getAllUser(query);
+  getAllUser(@Body() query: LoginRequestDto) {
+    return this.userService.login(query);
   }
 
   @Get(':id')
