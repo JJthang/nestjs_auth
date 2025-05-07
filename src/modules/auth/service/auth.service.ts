@@ -29,6 +29,8 @@ export class AuthService {
   }
 
   async register(formData: createUserDto) {
+    console.log('HELLO WORLD');
+
     try {
       const user = this.userRepository.create({
         ...formData,
