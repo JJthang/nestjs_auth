@@ -84,4 +84,13 @@ export class AuthService {
       refreshToken,
     };
   }
+
+  async validateJwtUser(userId: number) {
+    const user = await this.userRepository.findOne(userId);
+    if (!user) {
+      throw new UnauthorizedException('User not found 2');
+    }
+    const currentUser = { id: user.id, role: user.role };
+    return currentUser;
+  }
 }
