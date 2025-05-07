@@ -78,7 +78,7 @@ export class userPaginationDto {
 }
 
 export class idParams {
-  @Type(() => Number) // chuyển string → number
+  @Type(() => Number)
   @IsInt({ message: 'Id must be an integer' })
   id: number;
 }

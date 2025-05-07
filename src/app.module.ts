@@ -15,8 +15,6 @@ import { AuthModule } from './modules/auth/auth.module';
       isGlobal: true,
     }),
     TypeOrmModule.forRootAsync(typeOrmConfigAsync),
-    TypeOrmModule.forFeature([UserModule]),
-    TypeOrmModule.forFeature([AuthModule]),
   ],
   controllers: [AppController],
   providers: [AppService],

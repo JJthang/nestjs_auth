@@ -13,8 +13,8 @@ import {
   createUserDto as CreateUserDto,
   idParams,
   updateUserDto,
+  userPaginationDto,
 } from 'src/common/dtos/user/user.dto';
-import { LoginRequestDto } from 'src/common/dtos/auth/login.dto';
 
 @Controller('users')
 export class UserController {
@@ -29,15 +29,15 @@ export class UserController {
       data: result,
     };
   }
-  @Post('login')
-  @Get()
-  getAllUser(@Body() query: LoginRequestDto) {
-    return this.userService.login(query);
+
+  @Get('')
+  getAllUser(@Body() query: userPaginationDto) {
+    return this.userService.getAllUser(query);
   }
 
   @Get(':id')
-  getDetailUser(@Param('id') id: idParams) {
-    return this.userService.getDetailUser(+id);
+  getDetailUser(@Param() params: idParams) {
+    return this.userService.getDetailUser(params.id);
   }
 
   @Patch(':id')

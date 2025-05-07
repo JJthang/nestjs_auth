@@ -9,9 +9,6 @@ export class AuthController {
 
   @Post('/register')
   registerAccount(@Body() createAuthDto: createUserDto) {
-    console.log('====================================');
-    console.log('WOW Good job');
-    console.log('====================================');
     return this.userService.register(createAuthDto);
   }
 

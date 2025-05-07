@@ -3,6 +3,7 @@ import {
   Inject,
   Injectable,
   InternalServerErrorException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LoginRequestDto } from 'src/common/dtos/auth/login.dto';
@@ -29,14 +30,16 @@ export class AuthService {
   }
 
   async register(formData: createUserDto) {
-    console.log('HELLO WORLD');
-
     try {
       const user = this.userRepository.create({
         ...formData,
         password: await this.hashPassword(formData.password),
       });
-      return await this.userRepository.save(user);
+      const result = await this.userRepository.save(user);
+      return {
+        message: 'Register account successfully',
+        data: result,
+      };
     } catch (error) {
       if (
         error instanceof QueryFailedError &&
@@ -65,7 +68,7 @@ export class AuthService {
     );
 
     if (!isPasswordValid) {
-      throw new ConflictException('Password is incorrect');
+      throw new ConflictException('Password is incorrect now');
     }
     const { accessToken, refreshToken } = await this.generateToken(user.id);
 
@@ -88,7 +91,11 @@ export class AuthService {
   }
 
   async validateJwtUser(userId: number) {
-    const user = await this.userRepository.findOne(userId);
+    const user = await this.userRepository.findOne({
+      where: {
+        id: userId,
+      },
+    });
     if (!user) {
       throw new UnauthorizedException('User not found 2');
     }
