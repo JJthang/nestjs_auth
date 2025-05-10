@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from '../service/user.service';
 import {
@@ -15,6 +16,7 @@ import {
   updateUserDto,
   userPaginationDto,
 } from 'src/common/dtos/user/user.dto';
+import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
 
 @Controller('users')
 export class UserController {
@@ -30,6 +32,7 @@ export class UserController {
     };
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('')
   getAllUser(@Body() query: userPaginationDto) {
     return this.userService.getAllUser(query);
