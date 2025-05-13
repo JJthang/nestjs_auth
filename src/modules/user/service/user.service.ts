@@ -13,7 +13,6 @@ import {
 import { UserEntity } from 'src/database';
 import { ILike, QueryFailedError, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { LoginRequestDto } from 'src/common/dtos/auth/login.dto';
 
 @Injectable()
 export class UserService {
@@ -53,19 +52,6 @@ export class UserService {
     }
   }
 
-  async login(createUserDto: LoginRequestDto) {
-    const user = await this.userRepository.findOne({
-      where: {
-        email: createUserDto.email,
-      },
-    });
-    if (!user) {
-      throw new NotFoundException('Email does not exist');
-    }
-
-    return 'HELLO';
-  }
-
   async getAllUser(query: userPaginationDto) {
     const { email = '', limit = 10, setOff = 0 } = query;
     const where = email ? { email: ILike(`%${email}%`) } : undefined;
@@ -84,6 +70,12 @@ export class UserService {
         result: data,
       },
     };
+  }
+
+  async findOne(id: number) {
+    return this.userRepository.findOne({
+      where: { id },
+    });
   }
 
   async getDetailUser(id: number) {

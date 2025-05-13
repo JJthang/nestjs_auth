@@ -16,7 +16,8 @@ import {
   updateUserDto,
   userPaginationDto,
 } from 'src/common/dtos/user/user.dto';
-import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
+import { JwtAuthGuard } from 'src/common/guards/auth/jwt.guard';
+import { RefreshAuthGuard } from 'src/common/guards/auth/refreshToken.guard';
 
 @Controller('users')
 export class UserController {
@@ -33,6 +34,7 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @UseGuards(RefreshAuthGuard)
   @Get('')
   getAllUser(@Body() query: userPaginationDto) {
     return this.userService.getAllUser(query);

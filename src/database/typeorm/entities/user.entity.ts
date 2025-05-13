@@ -1,4 +1,3 @@
-import { hash } from 'bcrypt';
 import { Role } from 'src/common/enums/role.enum';
 import {
   Entity,
