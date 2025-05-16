@@ -1,6 +1,4 @@
 import { MailerOptions } from '@nestjs-modules/mailer';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
-import { join } from 'path';
 
 export const mailerConfig: MailerOptions = {
   // transport: 'smtps://user@example.com:topsecret@smtp.example.com',
@@ -8,7 +6,7 @@ export const mailerConfig: MailerOptions = {
   transport: {
     host: 'smtp.gmail.com',
     secure: false,
-    auth: { user: 'thangpdph@gmail.com', pass: 'qqvw crsw cgef cjmj' },
+    auth: { user: process.env.MAIL_USER, pass: process.env.MAIL_PASS },
   },
   // process.env.MAIL_USER
   // process.env.MAIL_PASS

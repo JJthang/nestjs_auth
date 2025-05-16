@@ -17,10 +17,9 @@ import { ConfigType } from '@nestjs/config';
 import { UserService } from 'src/modules/user/service/user.service';
 import * as argon2 from 'argon2';
 import { MailerService } from '@nestjs-modules/mailer';
-import { User } from 'src/types/user.type';
 import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { sendEmailDto } from 'src/common/dtos/auth/emal.dto';
+import { sendEmailDto } from 'src/common/dtos/auth/email.dto';
 
 @Injectable()
 export class AuthService {
@@ -210,7 +209,6 @@ export class AuthService {
       15 * 60 * 1000,
     );
 
-    // 2. Sinh token
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 phút
 
     await this.mailerService.sendMail({

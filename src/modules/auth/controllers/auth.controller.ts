@@ -10,8 +10,7 @@ import { createUserDto } from 'src/common/dtos/user/user.dto';
 import { AuthService } from '../service/auth.service';
 import { LoginRequestDto } from 'src/common/dtos/auth/login.dto';
 import { RefreshAuthGuard } from 'src/common/guards/auth/refreshToken.guard';
-import { Request } from 'express';
-import { sendEmailDto } from 'src/common/dtos/auth/emal.dto';
+import { sendEmailDto } from 'src/common/dtos/auth/email.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -34,13 +33,8 @@ export class AuthController {
   }
 
   @Post('/confirmEmail')
-  confirmEmail(
-    @Body() body: sendEmailDto,
-    @Session() session: Record<string, any>,
-  ) {
+  confirmEmail(@Body() body: sendEmailDto) {
     const token = Math.floor(100000 + Math.random() * 900000).toString(); // OTP 6 chữ số
-    session.tokenConfirmEmail = token;
-    session.email = body.email;
     return this.authService.sendUserConfirmation(body, token);
   }
 }
