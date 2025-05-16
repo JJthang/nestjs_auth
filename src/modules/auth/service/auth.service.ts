@@ -16,16 +16,30 @@ import refreshJwtConfig from 'src/config/auth/refreshJwt.config';
 import { ConfigType } from '@nestjs/config';
 import { UserService } from 'src/modules/user/service/user.service';
 import * as argon2 from 'argon2';
+import { MailerService } from '@nestjs-modules/mailer';
+import { User } from 'src/types/user.type';
+import { Cache } from 'cache-manager';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { sendEmailDto } from 'src/common/dtos/auth/emal.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private jwtService: JwtService,
+    private readonly jwtService: JwtService,
+
+    // Đúng: inject CACHE_MANAGER vào cacheManager
+    @Inject(CACHE_MANAGER)
+    private readonly cacheManager: Cache,
+
+    // Đúng: inject config của refreshJwtConfig
     @Inject(refreshJwtConfig.KEY)
-    private refreshTokenConfig: ConfigType<typeof refreshJwtConfig>,
+    private readonly refreshTokenConfig: ConfigType<typeof refreshJwtConfig>,
+
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+
     private readonly userService: UserService,
+    private readonly mailerService: MailerService,
   ) {}
   private async hashPassword(password: string): Promise<string> {
     const salt = await bcrypt.genSalt();
@@ -33,12 +47,25 @@ export class AuthService {
   }
 
   async register(formData: createUserDto) {
+    const storedCode = await this.cacheManager.get<{
+      token: string;
+      email: string;
+    }>('info');
+    if (!storedCode?.token.includes(formData.keyConfirmEmail)) {
+      throw new ConflictException(
+        'The verification code does not exist or has expired.',
+      );
+    } else if (!storedCode?.email.includes(formData.email)) {
+      throw new ConflictException('Incorrect email');
+    }
+
     try {
       const user = this.userRepository.create({
         ...formData,
         password: await this.hashPassword(formData.password),
       });
       const result = await this.userRepository.save(user);
+      await this.cacheManager.del('info');
       return {
         message: 'Register account successfully',
         data: result,
@@ -105,7 +132,6 @@ export class AuthService {
   }
 
   async refreshToken(id: number) {
-    console.log('idasdasdasdadsasd : ', id);
     const user = await this.userRepository.findOne({
       where: {
         id: id,
@@ -162,5 +188,46 @@ export class AuthService {
       throw new UnauthorizedException('Invalid Refresh Token');
 
     return { id: userId };
+  }
+
+  async sendUserConfirmation(user: sendEmailDto, token: string) {
+    const userResult = await this.userRepository.findOne({
+      where: {
+        email: user.email,
+      },
+    });
+
+    if (userResult) {
+      throw new ConflictException('Email already exists');
+    }
+
+    await this.cacheManager.set(
+      'info',
+      {
+        token,
+        email: user.email,
+      },
+      15 * 60 * 1000,
+    );
+
+    // 2. Sinh token
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 phút
+
+    await this.mailerService.sendMail({
+      to: user.email,
+      // from: '"Support Team" <support@example.com>', // override default from
+      subject: 'Welcome to Nice App! Confirm your Email',
+      html: `
+      <p>Hey ${user.email},</p>
+      <p>Your code is <strong>${token}</strong>. It expires in 15 minutes.</p>
+    `,
+      context: {
+        // ✏️ filling curly brackets with content
+        name: user.name,
+        text: `Mã của bạn là ${token}. Hết hạn sau 15 phút.`,
+      },
+    });
+
+    return { message: 'Confirmation email sent', expiresAt };
   }
 }

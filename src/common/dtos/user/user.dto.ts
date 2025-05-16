@@ -7,6 +7,7 @@ import {
   IsNumber,
   Min,
   IsInt,
+  Matches,
 } from 'class-validator';
 import { Role } from 'src/common/enums/role.enum';
 
@@ -18,6 +19,10 @@ export class createUserDto {
   lastName: string;
 
   @IsEmail()
+  @Matches(
+    /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
+    { message: 'Email is not valid in the required format' },
+  )
   email: string;
 
   @IsString()
@@ -34,6 +39,10 @@ export class createUserDto {
   @IsOptional()
   @IsString()
   hasTokenRefresh?: string;
+
+  @IsString()
+  @IsOptional()
+  keyConfirmEmail: string;
 }
 
 export class updateUserDto {

@@ -48,6 +48,9 @@ export class UserEntity {
   })
   hasTokenRefresh: string;
 
+  @Column({ default: false })
+  isActiveEmail: boolean;
+
   @BeforeInsert()
   beforeInsertActions() {
     this.created_at = new Date();

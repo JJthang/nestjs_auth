@@ -10,6 +10,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { UserModule } from '../user/user.module';
 import { JwtStrategy } from 'src/common/strategies/auth/jwt.straregy';
 import { RefreshJwtStrategy } from 'src/common/strategies/auth/refresh.strategy';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { mailerConfig } from 'src/config/auth/mail.config';
 
 @Module({
   imports: [
@@ -17,6 +19,7 @@ import { RefreshJwtStrategy } from 'src/common/strategies/auth/refresh.strategy'
     JwtModule.register(jwtConfig()),
     ConfigModule.forFeature(jwtConfig),
     ConfigModule.forFeature(refreshJwtConfig),
+    MailerModule.forRoot(mailerConfig),
     UserModule,
   ],
   controllers: [AuthController],
