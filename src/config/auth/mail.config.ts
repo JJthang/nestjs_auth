@@ -6,7 +6,7 @@ export const mailerConfig: MailerOptions = {
   transport: {
     host: 'smtp.gmail.com',
     secure: false,
-    auth: { user: process.env.MAIL_USER, pass: process.env.MAIL_PASS },
+    auth: { user: 'thangpdph@gmail.com', pass: 'qqvw crsw cgef cjmj' },
   },
   // process.env.MAIL_USER
   // process.env.MAIL_PASS

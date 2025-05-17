@@ -11,6 +11,10 @@ import { AuthService } from '../service/auth.service';
 import { LoginRequestDto } from 'src/common/dtos/auth/login.dto';
 import { RefreshAuthGuard } from 'src/common/guards/auth/refreshToken.guard';
 import { sendEmailDto } from 'src/common/dtos/auth/email.dto';
+import {
+  ChangePasswordDto,
+  forgotPasswordDto,
+} from 'src/common/dtos/auth/password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -34,7 +38,15 @@ export class AuthController {
 
   @Post('/confirmEmail')
   confirmEmail(@Body() body: sendEmailDto) {
-    const token = Math.floor(100000 + Math.random() * 900000).toString(); // OTP 6 chữ số
-    return this.authService.sendUserConfirmation(body, token);
+    return this.authService.sendUserConfirmation(body);
+  }
+  @Post('/verifyPassword')
+  forgotPassword(@Body() body: forgotPasswordDto) {
+    return this.authService.sendOtpVerifyPassword(body);
+  }
+
+  @Post('/changePassword')
+  changePassword(@Body() body: ChangePasswordDto) {
+    return this.authService.changePassword(body);
   }
 }
