@@ -3,6 +3,7 @@ import {
   Inject,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -20,6 +21,12 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { sendEmailDto } from 'src/common/dtos/auth/email.dto';
+import { hashPassword, randomToken, timeOfExistence } from 'src/utils';
+import {
+  ChangePasswordDto,
+  forgotPasswordDto,
+} from 'src/common/dtos/auth/password.dto';
+import { SecretOtp } from 'src/types/user.type';
 
 @Injectable()
 export class AuthService {
@@ -40,16 +47,26 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly mailerService: MailerService,
   ) {}
-  private async hashPassword(password: string): Promise<string> {
-    const salt = await bcrypt.genSalt();
-    return bcrypt.hash(password, salt);
+
+  private async sendVerificationEmail(
+    to: string,
+    token: string,
+  ): Promise<void> {
+    await this.mailerService.sendMail({
+      to,
+      subject: 'Welcome to Nice App! Confirm your Email',
+      html: `
+        <p>Hey ${to},</p>
+        <p>Your code is <strong>${token}</strong>. It expires in 15 minutes.</p>
+      `,
+      context: {
+        text: `Mã của bạn là ${token}. Hết hạn sau 15 phút.`,
+      },
+    });
   }
 
   async register(formData: createUserDto) {
-    const storedCode = await this.cacheManager.get<{
-      token: string;
-      email: string;
-    }>('info');
+    const storedCode = await this.cacheManager.get<SecretOtp>('info');
     if (!storedCode?.token.includes(formData.keyConfirmEmail)) {
       throw new ConflictException(
         'The verification code does not exist or has expired.',
@@ -61,7 +78,7 @@ export class AuthService {
     try {
       const user = this.userRepository.create({
         ...formData,
-        password: await this.hashPassword(formData.password),
+        password: await hashPassword(formData.password),
       });
       const result = await this.userRepository.save(user);
       await this.cacheManager.del('info');
@@ -80,37 +97,19 @@ export class AuthService {
     }
   }
 
-  async login(formData: LoginRequestDto) {
-    const user = await this.userRepository.findOne({
-      where: {
-        email: formData.email,
-      },
-    });
+  async login(body: LoginRequestDto) {
+    const user = await this.findUserByEmail(body.email);
 
-    if (!user) {
-      throw new ConflictException('Email is incorrect');
-    }
-
-    const isPasswordValid = await bcrypt.compare(
-      formData.password,
-      user.password,
-    );
+    const isPasswordValid = await bcrypt.compare(body.password, user.password);
 
     if (!isPasswordValid) {
       throw new ConflictException('Password is incorrect now');
     }
 
     const { accessToken, refreshToken } = await this.generateToken(user.id);
-    const hasTokenRefresh = await argon2.hash(refreshToken);
+    const hashedRt = await argon2.hash(refreshToken);
 
-    await this.userRepository.update(
-      {
-        id: user.id,
-      },
-      {
-        hasTokenRefresh,
-      },
-    );
+    await this.userRepository.update(user.id, { hasTokenRefresh: hashedRt });
 
     return {
       message: 'Account login successful',
@@ -131,14 +130,7 @@ export class AuthService {
   }
 
   async refreshToken(id: number) {
-    const user = await this.userRepository.findOne({
-      where: {
-        id: id,
-      },
-    });
-    if (!user) {
-      throw new ConflictException('Not found user');
-    }
+    await this.findUserById(id);
 
     const { accessToken, refreshToken } = await this.generateToken(id);
     const hashedRefreshToken = await argon2.hash(accessToken);
@@ -176,7 +168,7 @@ export class AuthService {
     const user = await this.userService.findOne(userId);
 
     if (!user || !user.hasTokenRefresh)
-      throw new UnauthorizedException('Invalid Refresh Token');
+      throw new NotFoundException('Invalid Refresh Token');
 
     const refreshTokenMatches = await argon2.verify(
       user.hasTokenRefresh,
@@ -184,48 +176,106 @@ export class AuthService {
     );
 
     if (!refreshTokenMatches)
-      throw new UnauthorizedException('Invalid Refresh Token');
+      throw new NotFoundException('Invalid Refresh Token');
 
     return { id: userId };
   }
 
-  async sendUserConfirmation(user: sendEmailDto, token: string) {
-    const userResult = await this.userRepository.findOne({
-      where: {
-        email: user.email,
-      },
-    });
-
-    if (userResult) {
-      throw new ConflictException('Email already exists');
-    }
+  async sendUserConfirmation(body: sendEmailDto) {
+    const token = randomToken(); // OTP 6 chữ số
+    const user = await this.findUserByEmail(body.email);
 
     await this.cacheManager.set(
       'info',
       {
         token,
-        email: user.email,
+        email: body.email,
       },
       15 * 60 * 1000,
     );
 
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 phút
+    const expiresAt = timeOfExistence(); // 15 phút
+    await this.sendVerificationEmail(user.email, token);
 
-    await this.mailerService.sendMail({
-      to: user.email,
-      // from: '"Support Team" <support@example.com>', // override default from
-      subject: 'Welcome to Nice App! Confirm your Email',
-      html: `
-      <p>Hey ${user.email},</p>
-      <p>Your code is <strong>${token}</strong>. It expires in 15 minutes.</p>
-    `,
-      context: {
-        // ✏️ filling curly brackets with content
-        name: user.name,
-        text: `Mã của bạn là ${token}. Hết hạn sau 15 phút.`,
+    return {
+      message: 'Confirmation email sent',
+      data: {
+        expiresAt,
       },
-    });
+    };
+  }
 
-    return { message: 'Confirmation email sent', expiresAt };
+  async sendOtpVerifyPassword(body: forgotPasswordDto) {
+    await this.findUserByEmail(body.email);
+    const token = randomToken(); // OTP 6 chữ số
+    const hashPass = await hashPassword(token);
+    if (!hashPass) {
+      throw new ConflictException('OTP code error');
+    }
+    const expiresAt = timeOfExistence();
+
+    await this.sendVerificationEmail(body.email, token);
+    await this.cacheManager.set(
+      'verifyPassword',
+      {
+        token,
+        email: body.email,
+      },
+      15 * 60 * 1000,
+    );
+
+    return {
+      message: 'Please check your new password in Email',
+      data: {
+        expiresAt,
+      },
+    };
+  }
+
+  async changePassword(body: ChangePasswordDto) {
+    const user = await this.findUserByEmail(body.email);
+
+    const isPasswordValid = await bcrypt.compare(body.password, user.password);
+
+    const storeVerify =
+      await this.cacheManager.get<SecretOtp>('verifyPassword');
+
+    if (!storeVerify?.token.includes(body.password) && !isPasswordValid) {
+      throw new ConflictException(
+        'The verification code does not exist or has expired.',
+      );
+    } else if (
+      !storeVerify?.email.includes(body.email) &&
+      !body.email.includes(user.email)
+    ) {
+      throw new ConflictException('Incorrect email');
+    }
+
+    await this.userRepository.update(
+      {
+        email: user.email,
+      },
+      {
+        password: await hashPassword(body.newPassword),
+      },
+    );
+    await this.cacheManager.del('verifyPassword');
+
+    return {
+      message: 'Password update successful',
+    };
+  }
+
+  /** Helpers */
+  private async findUserByEmail(email: string) {
+    const user = await this.userRepository.findOne({ where: { email } });
+    if (!user) throw new NotFoundException('User not found.');
+    return user;
+  }
+
+  private async findUserById(id: number) {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) throw new NotFoundException('User not found.');
+    return user;
   }
 }
