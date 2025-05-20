@@ -5,7 +5,10 @@ import {
   PrimaryGeneratedColumn,
   BeforeInsert,
   BeforeUpdate,
+  OneToMany,
 } from 'typeorm';
+import { BlogEntity } from './blog.entity';
+import { CommentEntity } from './comment.entity';
 
 @Entity()
 export class UserEntity {
@@ -47,6 +50,17 @@ export class UserEntity {
     nullable: true,
   })
   hasTokenRefresh: string;
+
+  @OneToMany(() => BlogEntity, (blog) => blog.author)
+  blogs: BlogEntity[];
+
+  // Quan hệ với comments
+  @OneToMany(() => CommentEntity, (comment) => comment.author)
+  comments: CommentEntity[];
+
+  // // Quan hệ với blogs đã xem
+  // @ManyToMany(() => Blog, (blog) => blog.viewedBy)
+  // viewedBlogs: Blog[];
 
   @Column({ default: false })
   isActiveEmail: boolean;
