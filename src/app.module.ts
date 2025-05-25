@@ -7,6 +7,7 @@ import { typeOrmConfigAsync } from './config/db/database.config';
 import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { CacheModule } from '@nestjs/cache-manager';
+import { TagModule } from './modules/tag/tag.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { CacheModule } from '@nestjs/cache-manager';
     }),
     UserModule,
     AuthModule,
+    TagModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),

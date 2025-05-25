@@ -12,13 +12,13 @@ import { BlogEntity } from './blog.entity';
 @Entity('tags')
 export class TagEntity {
   @PrimaryGeneratedColumn('uuid')
-  id: string; // tương đương _id ObjectId
+  id: string;
 
   @Column({ length: 50, unique: true })
   name: string; // tag_name
 
   @Column({ default: 0 })
-  count: number; // tag_count
+  count: number;
 
   @ManyToMany(() => BlogEntity, (blog) => blog.tags)
   blogs: BlogEntity[];

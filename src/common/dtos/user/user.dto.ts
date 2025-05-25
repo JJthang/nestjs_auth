@@ -20,7 +20,7 @@ export class createUserDto {
 
   @IsEmail()
   @Matches(
-    /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
+    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
     { message: 'Email is not valid in the required format' },
   )
   email: string;
@@ -86,8 +86,31 @@ export class userPaginationDto {
   email?: string;
 }
 
+export class paginationCommon {
+  @IsNumber()
+  @Type(() => Number)
+  @Min(1)
+  @IsOptional()
+  limit?: number = 5;
+
+  @IsNumber()
+  @Type(() => Number)
+  @Min(0)
+  @IsOptional()
+  setOff?: number = 0;
+
+  @IsString()
+  @Type(() => String)
+  @IsOptional()
+  name?: string;
+}
+
 export class idParams {
   @Type(() => Number)
   @IsInt({ message: 'Id must be an integer' })
   id: number;
+}
+export class idParamsString {
+  @Type(() => String)
+  id: string;
 }
