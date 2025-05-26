@@ -15,36 +15,44 @@ import {
   ChangePasswordDto,
   forgotPasswordDto,
 } from 'src/common/dtos/auth/password.dto';
+import { Public } from '@/common/decorators/public.decorator';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-  // createUserDto
+
+  @Public()
   @Post('/register')
   registerAccount(@Body() createAuthDto: createUserDto) {
     return this.authService.register(createAuthDto);
   }
 
+  @Public()
   @Post('/login')
   loginAccount(@Body() body: LoginRequestDto) {
     return this.authService.login(body);
   }
 
+  @Public()
   @UseGuards(RefreshAuthGuard)
   @Post('/refreshToken')
   refreshToken(@Req() req: { user: { id: number } }) {
     return this.authService.refreshToken(req.user.id);
   }
 
+  @Public()
   @Post('/confirmEmail')
   confirmEmail(@Body() body: sendEmailDto) {
     return this.authService.sendUserConfirmation(body);
   }
+
+  @Public()
   @Post('/verifyPassword')
   forgotPassword(@Body() body: forgotPasswordDto) {
     return this.authService.sendOtpVerifyPassword(body);
   }
 
+  @Public()
   @Post('/changePassword')
   changePassword(@Body() body: ChangePasswordDto) {
     return this.authService.changePassword(body);

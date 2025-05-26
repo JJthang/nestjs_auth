@@ -12,6 +12,9 @@ import { JwtStrategy } from 'src/common/strategies/auth/jwt.straregy';
 import { RefreshJwtStrategy } from 'src/common/strategies/auth/refresh.strategy';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { mailerConfig } from 'src/config/auth/mail.config';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from '@/common/guards/auth/jwt.guard';
+import { RolesGuard } from '@/common/guards/auth/roles.guard';
 
 @Module({
   imports: [
@@ -23,6 +26,18 @@ import { mailerConfig } from 'src/config/auth/mail.config';
     UserModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, RefreshJwtStrategy],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    RefreshJwtStrategy,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+  ],
 })
 export class AuthModule {}

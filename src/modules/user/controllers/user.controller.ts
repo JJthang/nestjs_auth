@@ -18,20 +18,13 @@ import {
 } from 'src/common/dtos/user/user.dto';
 import { JwtAuthGuard } from 'src/common/guards/auth/jwt.guard';
 import { RefreshAuthGuard } from 'src/common/guards/auth/refreshToken.guard';
+import { RolesGuard } from '@/common/guards/auth/roles.guard';
+import { Roles } from '@/common/decorators/roles.decorator';
+import { Role } from '@/common/enums/role.enum';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
-  @Post('register')
-  async signUp(@Body() createUserDto: CreateUserDto) {
-    const result = await this.userService.signUp(createUserDto);
-    return {
-      status: HttpStatus.CREATED,
-      messate: 'Create Account Successfully',
-      data: result,
-    };
-  }
 
   @UseGuards(JwtAuthGuard)
   @UseGuards(RefreshAuthGuard)
@@ -50,8 +43,11 @@ export class UserController {
     return this.userService.update(params.id, updateUserDto);
   }
 
+  @Roles(Role.ADMIN, Role.MANAGER)
+  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: idParams) {
-    return this.userService.remove(+id);
+  remove(@Param() params: idParams) {
+    return this.userService.removeAccount(params.id);
   }
 }

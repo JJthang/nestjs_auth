@@ -106,7 +106,10 @@ export class AuthService {
       throw new ConflictException('Password is incorrect now');
     }
 
-    const { accessToken, refreshToken } = await this.generateToken(user.id);
+    const { accessToken, refreshToken } = await this.generateToken(
+      user.id,
+      user.role,
+    );
     const hashedRt = await argon2.hash(refreshToken);
 
     await this.userRepository.update(user.id, { hasTokenRefresh: hashedRt });
@@ -117,8 +120,8 @@ export class AuthService {
     };
   }
 
-  async generateToken(userId: number) {
-    const payload = { sub: userId };
+  async generateToken(userId: number, role: string) {
+    const payload = { sub: userId, role };
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.sign(payload),
       this.jwtService.sign(payload, this.refreshTokenConfig),
@@ -130,9 +133,12 @@ export class AuthService {
   }
 
   async refreshToken(id: number) {
-    await this.findUserById(id);
+    const user = await this.findUserById(id);
 
-    const { accessToken, refreshToken } = await this.generateToken(id);
+    const { accessToken, refreshToken } = await this.generateToken(
+      id,
+      user.role,
+    );
     const hashedRefreshToken = await argon2.hash(accessToken);
     await this.updateHashedRefreshToken(id, hashedRefreshToken);
 
@@ -183,7 +189,7 @@ export class AuthService {
 
   async sendUserConfirmation(body: sendEmailDto) {
     const token = randomToken(); // OTP 6 chữ số
-    const user = await this.findUserByEmail(body.email);
+    // const user = await this.findUserByEmail(body.email);
 
     await this.cacheManager.set(
       'info',
@@ -195,7 +201,7 @@ export class AuthService {
     );
 
     const expiresAt = timeOfExistence(); // 15 phút
-    await this.sendVerificationEmail(user.email, token);
+    await this.sendVerificationEmail(body.email, token);
 
     return {
       message: 'Confirmation email sent',

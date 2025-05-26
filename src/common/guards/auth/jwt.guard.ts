@@ -32,15 +32,12 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   handleRequest(err: any, user: any, info: Error) {
     if (info instanceof TokenExpiredError) {
       // Trả về 401 với message rõ “Token hết hạn”
-      throw new UnauthorizedException('Tokens expire');
+      throw new UnauthorizedException('Session expired');
     }
     // Lỗi khác hoặc không có user thì ném mặc định
     if (err || !user) {
       throw err || new UnauthorizedException();
     }
-    console.log('====================================');
-    console.log('user : ', user);
-    console.log('====================================');
     return user;
   }
 }
