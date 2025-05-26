@@ -3,24 +3,21 @@ import {
   Controller,
   Delete,
   Get,
-  HttpStatus,
   Param,
   Patch,
-  Post,
   UseGuards,
 } from '@nestjs/common';
-import { UserService } from '../service/user.service';
 import {
-  createUserDto as CreateUserDto,
   idParams,
   updateUserDto,
   userPaginationDto,
-} from 'src/common/dtos/user/user.dto';
-import { JwtAuthGuard } from 'src/common/guards/auth/jwt.guard';
-import { RefreshAuthGuard } from 'src/common/guards/auth/refreshToken.guard';
-import { RolesGuard } from '@/common/guards/auth/roles.guard';
-import { Roles } from '@/common/decorators/roles.decorator';
-import { Role } from '@/common/enums/role.enum';
+} from '@/shared/dtos/user/user.dto';
+import { JwtAuthGuard } from '@/shared/guards/auth/jwt.guard';
+import { RefreshAuthGuard } from '@/shared/guards/auth/refreshToken.guard';
+import { RolesGuard } from '@/shared/guards/auth/roles.guard';
+import { Role } from '@/shared/enums/role.enum';
+import { Roles } from '@/shared/decorators/roles.decorator';
+import { UserService } from '../service/user.service';
 
 @Controller('users')
 export class UserController {

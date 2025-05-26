@@ -1,6 +1,6 @@
 import { TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { BlogEntity, CommentEntity, TagEntity, UserEntity } from 'src/database';
+import { BlogEntity, CommentEntity, TagEntity, UserEntity } from '@/typeorm';
 
 export const typeOrmConfigAsync: TypeOrmModuleAsyncOptions = {
   imports: [ConfigModule],

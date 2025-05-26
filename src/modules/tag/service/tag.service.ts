@@ -4,10 +4,10 @@ import {
   PageDto,
   PageMetaDto,
   PageOptionsDto,
-} from 'src/common/dtos/common/pagination.dto';
-import { CreateTagDto } from 'src/common/dtos/tag/tag.dto';
-import { TagEntity } from 'src/database';
+} from '@/shared/dtos/common/pagination.dto';
+import { CreateTagDto } from '@/shared/dtos/tag/tag.dto';
 import { Repository } from 'typeorm';
+import { TagEntity } from '@/typeorm';
 
 @Injectable()
 export class TagService {

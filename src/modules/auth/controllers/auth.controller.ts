@@ -1,21 +1,14 @@
-import {
-  Body,
-  Controller,
-  Post,
-  Req,
-  Session,
-  UseGuards,
-} from '@nestjs/common';
-import { createUserDto } from 'src/common/dtos/user/user.dto';
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { createUserDto } from '@/shared/dtos/user/user.dto';
 import { AuthService } from '../service/auth.service';
-import { LoginRequestDto } from 'src/common/dtos/auth/login.dto';
-import { RefreshAuthGuard } from 'src/common/guards/auth/refreshToken.guard';
-import { sendEmailDto } from 'src/common/dtos/auth/email.dto';
+import { LoginRequestDto } from '@/shared/dtos/auth/login.dto';
+import { RefreshAuthGuard } from '@/shared/guards/auth/refreshToken.guard';
+import { sendEmailDto } from '@/shared/dtos/auth/email.dto';
 import {
   ChangePasswordDto,
   forgotPasswordDto,
-} from 'src/common/dtos/auth/password.dto';
-import { Public } from '@/common/decorators/public.decorator';
+} from '@/shared/dtos/auth/password.dto';
+import { Public } from '@/shared/decorators/public.decorator';
 
 @Controller('auth')
 export class AuthController {

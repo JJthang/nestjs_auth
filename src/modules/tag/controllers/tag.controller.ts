@@ -9,12 +9,12 @@ import {
   Query,
   UseInterceptors,
 } from '@nestjs/common';
-import { CreateTagDto } from 'src/common/dtos/tag/tag.dto';
+import { CreateTagDto } from '@/shared/dtos/tag/tag.dto';
 import { TagService } from '../service/tag.service';
-import { idParamsString } from 'src/common/dtos/user/user.dto';
+import { idParamsString } from '@/shared/dtos/user/user.dto';
 // import { PaginationInterceptor } from 'src/common/interceptors/pagination.interceptor';
-import { PaginationPipe } from 'src/common/pipes/common/pagination.pipe';
-import { PageOptionsDto } from 'src/common/dtos/common/pagination.dto';
+import { PaginationPipe } from '@/shared/pipes/common/pagination.pipe';
+import { PageOptionsDto } from '@/shared/dtos/common/pagination.dto';
 
 @Controller('tags')
 @UseInterceptors(ClassSerializerInterceptor)

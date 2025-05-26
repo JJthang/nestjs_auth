@@ -7,26 +7,26 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LoginRequestDto } from 'src/common/dtos/auth/login.dto';
-import { createUserDto } from 'src/common/dtos/user/user.dto';
-import { UserEntity } from 'src/database';
+import { LoginRequestDto } from '@/shared/dtos/auth/login.dto';
+import { createUserDto } from '@/shared/dtos/user/user.dto';
 import { QueryFailedError, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import refreshJwtConfig from 'src/config/auth/refreshJwt.config';
 import { ConfigType } from '@nestjs/config';
-import { UserService } from 'src/modules/user/service/user.service';
 import * as argon2 from 'argon2';
 import { MailerService } from '@nestjs-modules/mailer';
 import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { sendEmailDto } from 'src/common/dtos/auth/email.dto';
+import { sendEmailDto } from '@/shared/dtos/auth/email.dto';
 import { hashPassword, randomToken, timeOfExistence } from 'src/utils';
 import {
   ChangePasswordDto,
   forgotPasswordDto,
-} from 'src/common/dtos/auth/password.dto';
-import { SecretOtp } from 'src/types/user.type';
+} from '@/shared/dtos/auth/password.dto';
+import { SecretOtp } from '@/shared/types/user.type';
+import { UserService } from '../../user/service/user.service';
+import { UserEntity } from '@/typeorm';
 
 @Injectable()
 export class AuthService {

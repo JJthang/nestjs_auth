@@ -1,5 +1,4 @@
 import { IsEmail, IsNotEmpty, IsString, Matches } from 'class-validator';
-import { Match } from 'src/common/decorators/match.decorator';
 import { validateEmail } from 'src/utils';
 
 export class forgotPasswordDto {

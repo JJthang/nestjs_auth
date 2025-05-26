@@ -4,9 +4,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmConfigAsync } from './config/db/database.config';
+
+import { CacheModule } from '@nestjs/cache-manager';
 import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
-import { CacheModule } from '@nestjs/cache-manager';
 import { TagModule } from './modules/tag/tag.module';
 
 @Module({

@@ -9,10 +9,10 @@ import {
   createUserDto as CreateUserDto,
   updateUserDto,
   userPaginationDto,
-} from 'src/common/dtos/user/user.dto';
-import { UserEntity } from 'src/database';
+} from '@/shared/dtos/user/user.dto';
 import { ILike, QueryFailedError, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { UserEntity } from '@/typeorm';
 
 @Injectable()
 export class UserService {

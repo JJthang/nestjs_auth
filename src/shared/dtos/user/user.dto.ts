@@ -9,7 +9,7 @@ import {
   IsInt,
   Matches,
 } from 'class-validator';
-import { Role } from 'src/common/enums/role.enum';
+import { Role } from '@/shared/enums/role.enum';
 
 export class createUserDto {
   @IsString()

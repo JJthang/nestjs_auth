@@ -1,7 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsArray, IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
-import { Order } from 'src/constants/pagination';
+import { Order } from '@/shared/constants/pagination';
 
 export class PageOptionsDto {
   @ApiPropertyOptional({ enum: Order, default: Order.ASC })
@@ -37,7 +37,7 @@ export class PageOptionsDto {
 }
 
 import { ApiProperty } from '@nestjs/swagger';
-import { PageMetaDtoParameters } from 'src/types/pagination.type';
+import { PageMetaDtoParameters } from '@/shared/types/pagination.type';
 
 export class PageMetaDto {
   @ApiProperty()

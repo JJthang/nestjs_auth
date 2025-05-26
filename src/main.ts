@@ -1,8 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { HttpStatus, ValidationPipe } from '@nestjs/common';
-import { HttpExceptionFilter } from './common/errors/ErrorHttpStatus';
-import { SuccessResponseInterceptor } from './common/interceptors/success-response.interceptor';
+import { HttpExceptionFilter } from './shared/errors/ErrorHttpStatus';
+import { SuccessResponseInterceptor } from './shared/interceptors/success-response.interceptor';
 import * as session from 'express-session';
 
 async function bootstrap() {

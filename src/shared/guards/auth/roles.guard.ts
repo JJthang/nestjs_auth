@@ -1,6 +1,6 @@
-import { ROLES_KEY } from '@/common/decorators/roles.decorator';
-import { Role } from '@/common/enums/role.enum';
-import { UserPayload } from '@/types/user.type';
+import { Role } from '@/shared/enums/role.enum';
+import { ROLES_KEY } from '@/shared/decorators/roles.decorator';
+import { UserPayload } from '@/shared/types/user.type';
 import {
   Injectable,
   CanActivate,
